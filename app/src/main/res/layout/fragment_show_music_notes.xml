@@ -1,14 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ShowMusicNotesFragment">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <data>
+        <variable
+            name="musicNotesViewModel"
+            type="com.example.simplemusicnotesreader.viewmodels.MusicNotesViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        tools:context=".ShowMusicNotesFragment">
 
-</FrameLayout>
+
+        <Button
+            android:id="@+id/openFileBtn"
+            android:layout_width="107dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="72dp"
+            android:layout_marginBottom="32dp"
+            android:text="Open File"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/playBtn"
+            android:layout_width="88dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="75dp"
+            android:text="Play"
+            android:enabled="@{Boolean.valueOf(musicNotesViewModel.isPlayBtnEnable)}"
+            app:layout_constraintBottom_toBottomOf="@+id/openFileBtn"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/openFileBtn"
+            app:layout_constraintTop_toTopOf="@+id/openFileBtn" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+<!--    android:onClick="@{(view)->musicNotesViewModel.onOpenFile(view)}"-->
+</layout>

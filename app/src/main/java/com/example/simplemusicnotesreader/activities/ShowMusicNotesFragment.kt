@@ -1,4 +1,4 @@
-package com.example.simplemusicnotesreader
+package com.example.simplemusicnotesreader.activities
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
@@ -9,9 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
+import com.example.simplemusicnotesreader.R
 import com.example.simplemusicnotesreader.databinding.FragmentShowMusicNotesBinding
 import com.example.simplemusicnotesreader.factories.MusicNotesViewModelFactory
 import com.example.simplemusicnotesreader.models.parseXml
+import com.example.simplemusicnotesreader.models.xmldocListCorvertTobarDataList
 import com.example.simplemusicnotesreader.viewmodels.MusicNotesViewModel
 
 
@@ -32,7 +34,8 @@ class ShowMusicNotesFragment : Fragment() {
     ): View? {
 
         val binding: FragmentShowMusicNotesBinding = DataBindingUtil.inflate(
-            inflater, R.layout.fragment_show_music_notes, container, false
+            inflater,
+            R.layout.fragment_show_music_notes, container, false
         )
 
         viewModelFactory = MusicNotesViewModelFactory()
@@ -60,6 +63,10 @@ class ShowMusicNotesFragment : Fragment() {
             val selectedFile = data?.data
             val inputStream = activity?.contentResolver?.openInputStream(selectedFile!!)
             var doc = parseXml(inputStream!!)
+
+            val barList = doc.getElementsByTagName("measure")
+
+            val bars = xmldocListCorvertTobarDataList(barList)
             println(doc)
             musicNotesViewModel.OpenFileFinish()
         }

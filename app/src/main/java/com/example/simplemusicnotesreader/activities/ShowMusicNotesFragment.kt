@@ -15,6 +15,7 @@ import com.example.simplemusicnotesreader.factories.MusicNotesViewModelFactory
 import com.example.simplemusicnotesreader.models.parseXml
 import com.example.simplemusicnotesreader.models.xmldocListCorvertTobarDataList
 import com.example.simplemusicnotesreader.viewmodels.MusicNotesViewModel
+import com.google.gson.Gson
 
 
 class ShowMusicNotesFragment : Fragment() {
@@ -67,7 +68,10 @@ class ShowMusicNotesFragment : Fragment() {
             val barList = doc.getElementsByTagName("measure")
 
             val bars = xmldocListCorvertTobarDataList(barList)
-            println(doc)
+            var gson = Gson()
+            var jsonString: String = gson.toJson(bars)
+            println(jsonString)
+
             musicNotesViewModel.OpenFileFinish()
         }
     }

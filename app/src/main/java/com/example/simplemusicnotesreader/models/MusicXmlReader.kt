@@ -1,15 +1,16 @@
 package com.example.simplemusicnotesreader.models
 
+import com.example.simplemusicnotesreader.enums.Tie
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import java.lang.Exception
 
 
-fun getDivisions(barattr: NodeList) = getNodeValue(
-    "divisions", barattr.item(0) as Element
-
-).toInt()
+fun getDivisions(barattr: NodeList): Int {
+    var divisions = getNodeValue("divisions", barattr.item(0) as Element)
+    return if (divisions != "") divisions.toInt() else 0
+}
 
 fun getTimeSignature(barattr: NodeList): String {
     val best = getNodeValue("beats", barattr.item(0) as Element)
@@ -91,7 +92,8 @@ fun xmldocListCorvertTobarDataList(docs: NodeList): ArrayList<barData> {
         /**attributes part*/
         val barattr = (measure as Element).getElementsByTagName("attributes")
         if (barattr.length != 0) {
-            division = getDivisions(barattr)
+            val newDivision = getDivisions(barattr)
+            division = if(newDivision!=0) newDivision else division
             timeSignation = getTimeSignature(barattr)
             keySignation = getkeySignature(barattr)
         } else {
@@ -114,7 +116,7 @@ fun getNodeValue(tag: String, element: Element): String {
         if (node.hasChildNodes()) {
             val child = node.getFirstChild()
             while (child != null) {
-                if (child.getNodeType() === Node.TEXT_NODE) {
+                if (child.getNodeType() == Node.TEXT_NODE) {
                     return child.getNodeValue()
                 }
             }

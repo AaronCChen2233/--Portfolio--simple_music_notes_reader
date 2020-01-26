@@ -12,18 +12,24 @@
   <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
   <script type="text/javascript">
 
-    $.getJSON("test2.json", function (json) {
-      Drawmusicnotes(json)
-    });
+    /**for test*/
+    // $.getJSON("test.json", function (json) {
+    //   Drawmusicnotes(json)
+    // });
 
     var VF = Vex.Flow;
-    function Drawmusicnotes(json) {
-      // debugger;
+    function Drawmusicnotes(jsonString) {
+
+      var json = JSON.parse(jsonString)
+      // var json = jsonString;
+
       var boo = document.getElementById("boo")
       for (var i = 0; i < json.length; i++) {
         var div = document.createElement("div");
+        /**for test*/
+        // var bar = jsonString[i]
+
         var bar = json[i]
-        // debugger;
         var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
         renderer.resize(500, 110);
         var context = renderer.getContext();
@@ -46,9 +52,7 @@
     }
 
     function drawBar(bar, context) {
-
       var stave = new VF.Stave(10, 0, 300);
-      // var stave = new VF.Stave(bar.height, 0, bar.width);
       stave.addClef("treble");
 
       if (bar.keySignaturest != "") {
@@ -57,7 +61,6 @@
       if (bar.timeSignature != "") {
         stave.addTimeSignature(bar.timeSignature);
       }
-
       return stave
     }
 
@@ -70,7 +73,6 @@
         }
         notes.push(vfnote);
       })
-
       return notes
     }
 

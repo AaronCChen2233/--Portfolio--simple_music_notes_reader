@@ -2,15 +2,17 @@ package com.example.simplemusicnotesreader
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.simplemusicnotesreader.models.note
-import com.google.gson.Gson
-
-//import kotlinx.serialization.internal.UnitSerializer.serialize
+import android.util.DisplayMetrics
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        /**Get width and height*/
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        var width = displayMetrics.widthPixels
+        var height = displayMetrics.heightPixels
     }
 }

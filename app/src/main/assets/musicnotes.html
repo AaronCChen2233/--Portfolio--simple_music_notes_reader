@@ -20,18 +20,22 @@
     var VF = Vex.Flow;
     function Drawmusicnotes(jsonString) {
 
-      var json = JSON.parse(jsonString)
+      /**for test*/
       // var json = jsonString;
+      var json = JSON.parse(jsonString)
 
       var boo = document.getElementById("boo")
+
+      boo.innerText='';
+
       for (var i = 0; i < json.length; i++) {
         var div = document.createElement("div");
         /**for test*/
         // var bar = jsonString[i]
-
         var bar = json[i]
+        
         var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-        renderer.resize(500, 110);
+        renderer.resize(315, 110);
         var context = renderer.getContext();
 
         var stave = drawBar(bar, context)

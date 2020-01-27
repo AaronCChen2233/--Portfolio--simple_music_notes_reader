@@ -21,10 +21,36 @@ fun getTimeSignature(barattr: NodeList): String {
     return "$best/$beatType"
 }
 
-fun getkeySignature(barattr: NodeList) = majorCorverter(getNodeValue("fifths", barattr.item(0) as Element))
+fun getkeySignature(barattr: NodeList) =
+    majorCorverter(getNodeValue("fifths", barattr.item(0) as Element))
 
+fun getTies(notes: ArrayList<note>): ArrayList<tie> {
+    var ties = ArrayList<tie>()
+    var startIndex = 0
+    var stopIndex = 0
 
-fun getNotes(measure: Node, divisions: Int): ArrayList<note> {
+    for (i in 0..notes.size - 1) {
+        when (notes.get(i).tie) {
+            Tie.Start ->
+                startIndex = i
+
+            Tie.Stop -> {
+                stopIndex = i
+                ties.add(tie(startIndex, stopIndex))
+            }
+
+            Tie.Both -> {
+                stopIndex = i
+                ties.add(tie(startIndex, stopIndex))
+                startIndex = i
+            }
+        }
+    }
+
+    return ties
+}
+
+fun getNotes(measure: Node): ArrayList<note> {
 
     val notes: ArrayList<note> = ArrayList<note>()
 
@@ -32,7 +58,6 @@ fun getNotes(measure: Node, divisions: Int): ArrayList<note> {
     for (i in 0..nList.length - 1) {
         try {
             val note = nList.item(i)
-
             val haveDot = (note as Element).getElementsByTagName("dot").length > 0
             val isRest = (note as Element).getElementsByTagName("rest").length > 0
             var key = ""
@@ -83,7 +108,10 @@ fun durationCorverter(xmlDuration: String, isRest: Boolean): String {
     }
 
     if (isRest) {
+        /**If is whole rest note didn't have type*/
+        corvertedDuration = if (corvertedDuration == "") "1" else corvertedDuration
         corvertedDuration += "r"
+
     }
 
     return corvertedDuration
@@ -92,51 +120,25 @@ fun durationCorverter(xmlDuration: String, isRest: Boolean): String {
 fun majorCorverter(key: String): String {
     /**Default said it is C major*/
     var majorString = "C"
-    when (key){
-        "0"-> majorString = "C"
-        "1"-> majorString = "G"
-        "2"-> majorString = "D"
-        "3"-> majorString = "A"
-        "4"-> majorString = "E"
-        "5"-> majorString = "B"
-        "6"-> majorString = "#F"
-        "7"-> majorString = "#C"
+    when (key) {
+        "0" -> majorString = "C"
+        "1" -> majorString = "G"
+        "2" -> majorString = "D"
+        "3" -> majorString = "A"
+        "4" -> majorString = "E"
+        "5" -> majorString = "B"
+        "6" -> majorString = "#F"
+        "7" -> majorString = "#C"
 
-        "-1"-> majorString = "F"
-        "-2"-> majorString = "bB"
-        "-3"-> majorString = "bE"
-        "-4"-> majorString = "bA"
-        "-5"-> majorString = "bD"
-        "-6"-> majorString = "bG"
-        "-7"-> majorString = "bC"
+        "-1" -> majorString = "F"
+        "-2" -> majorString = "bB"
+        "-3" -> majorString = "bE"
+        "-4" -> majorString = "bA"
+        "-5" -> majorString = "bD"
+        "-6" -> majorString = "bG"
+        "-7" -> majorString = "bC"
     }
-    return  majorString
-}
-
-fun getTies(notes: ArrayList<note>): ArrayList<tie> {
-    var ties = ArrayList<tie>()
-    var startIndex = 0
-    var stopIndex = 0
-
-    for (i in 0..notes.size - 1) {
-        when (notes.get(i).tie) {
-            Tie.Start ->
-                startIndex = i
-
-            Tie.Stop -> {
-                stopIndex = i
-                ties.add(tie(startIndex, stopIndex))
-            }
-
-            Tie.Both -> {
-                stopIndex = i
-                ties.add(tie(startIndex, stopIndex))
-                startIndex = i
-            }
-        }
-    }
-
-    return ties
+    return majorString
 }
 
 fun xmldocListCorvertTobarDataList(docs: NodeList): ArrayList<barData> {
@@ -158,27 +160,11 @@ fun xmldocListCorvertTobarDataList(docs: NodeList): ArrayList<barData> {
             timeSignation = ""
         }
 
-        val notes = getNotes(measure, division)
+        val notes = getNotes(measure)
 
         /**Now for test use fixed width and height after test should use phone screen size*/
         val bar = barData(timeSignation, keySignation, notes, getTies(notes), 300, 10, 60)
         bars.add(bar)
     }
     return bars
-}
-
-fun getNodeValue(tag: String, element: Element): String {
-    val nodeList = element.getElementsByTagName(tag)
-    val node = nodeList.item(0)
-    if (node != null) {
-        if (node.hasChildNodes()) {
-            val child = node.getFirstChild()
-            while (child != null) {
-                if (child.getNodeType() == Node.TEXT_NODE) {
-                    return child.getNodeValue()
-                }
-            }
-        }
-    }
-    return ""
 }

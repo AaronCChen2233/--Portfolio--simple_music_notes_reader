@@ -3,6 +3,7 @@ package com.example.simplemusicnotesreader.activities
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
+import android.util.DisplayMetrics
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -34,7 +35,6 @@ class ShowMusicNotesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
         val binding: FragmentShowMusicNotesBinding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_show_music_notes, container, false
@@ -44,6 +44,7 @@ class ShowMusicNotesFragment : Fragment() {
         musicNotesViewModel =
             ViewModelProviders.of(this, viewModelFactory).get(MusicNotesViewModel::class.java)
 
+        /**Select musicXMl File*/
         binding.openFileBtn.setOnClickListener { view ->
             val intent = Intent()
                 .setType("*/*")
@@ -52,17 +53,19 @@ class ShowMusicNotesFragment : Fragment() {
 
         }
 
+        /**webView setting*/
         browser = binding.notesWebView
         val settings = browser.settings
         settings.javaScriptCanOpenWindowsAutomatically = true
         settings.javaScriptEnabled = true
         settings.allowFileAccess = true
         settings.domStorageEnabled = true
-
         browser.loadUrl("file:///android_asset/musicnotes.html")
+
 
         binding.musicNotesViewModel = musicNotesViewModel
         binding.setLifecycleOwner(this)
+
         return binding.root
     }
 
@@ -72,19 +75,17 @@ class ShowMusicNotesFragment : Fragment() {
             val selectedFile = data?.data
             val inputStream = activity?.contentResolver?.openInputStream(selectedFile!!)
             var doc = parseXml(inputStream!!)
-
             val barList = doc.getElementsByTagName("measure")
-
             val bars = xmldocListCorvertTobarDataList(barList)
+
+            /**Convert to json*/
             var gson = Gson()
             var jsonString: String = gson.toJson(bars)
-//            println(jsonString)
 
             browser.post {
                 run {
                     var url = "javascript:Drawmusicnotes('$jsonString')"
                     browser.loadUrl(url)
-//                    browser.loadDataWithBaseURL("file:///android_asset/musicnotes.html", url, "text/html", "utf-8", null);
                 }
             }
 

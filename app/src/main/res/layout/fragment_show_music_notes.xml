@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="android.view.View"/>
         <variable
             name="musicNotesViewModel"
             type="com.example.simplemusicnotesreader.viewmodels.MusicNotesViewModel" />
@@ -44,6 +45,18 @@
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@+id/openFileBtn"
             app:layout_constraintTop_toTopOf="@+id/openFileBtn" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="35sp"
+            android:visibility="@{(Boolean.valueOf(musicNotesViewModel.isShowTitleImage()) ? View.VISIBLE : View.GONE)}"
+            app:layout_constraintBottom_toBottomOf="@+id/notesWebView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/notesWebView"
+            app:layout_constraintTop_toTopOf="@+id/notesWebView"
+            app:srcCompat="@drawable/title_img" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 <!--    android:onClick="@{(view)->musicNotesViewModel.onOpenFile(view)}"-->
 </layout>

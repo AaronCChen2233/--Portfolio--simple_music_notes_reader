@@ -14,7 +14,18 @@ class MusicNotesViewModel : ViewModel() {
     val isPlayBtnEnable: LiveData<Boolean>
         get() = _isPlayBtnEnable
 
-    fun OpenFileFinish(){
+
+    private val _isShowTitleImage = MutableLiveData<Boolean>()
+
+    val isShowTitleImage: LiveData<Boolean>
+        get() = _isShowTitleImage
+
+    init {
+        _isShowTitleImage.value = true
+    }
+
+    fun OpenFileFinish() {
         _isPlayBtnEnable.value = true
+        _isShowTitleImage.value = false
     }
 }

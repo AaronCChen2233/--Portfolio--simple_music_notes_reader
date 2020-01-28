@@ -4,15 +4,22 @@ import android.os.Parcelable
 import com.example.simplemusicnotesreader.enums.Tie
 import kotlinx.android.parcel.Parcelize
 
+
+data class musicSheet(
+    val title: String,
+    val barWidth: Int,
+    val barHeight: Int,
+    val barDatas: ArrayList<barData>
+)
+
+
 @Parcelize
 data class barData(
     val timeSignature: String,
     val keySignaturest: String,
     val notes: ArrayList<note>,
     val ties: ArrayList<tie>,
-    val width: Int,
-    val height: Int,
-    val speed: Int
+    val barTime: Long
 ) : Parcelable
 
 

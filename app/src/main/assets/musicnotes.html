@@ -5,6 +5,12 @@
   <meta charset="UTF-8">
   <title>Document</title>
 </head>
+<style>
+h2{
+  text-align: center;
+}
+</style>
+
 
 <body>
   <div id="boo"></div>
@@ -19,21 +25,23 @@
 
     var VF = Vex.Flow;
     function Drawmusicnotes(jsonString) {
+      var boo = document.getElementById("boo")
+      boo.innerText = '';
 
       /**for test*/
       // var json = jsonString;
       var json = JSON.parse(jsonString)
 
-      var boo = document.getElementById("boo")
+      var bars = json.barDatas;
+      var title = document.createElement("h2");
+      title.setAttribute("id","title")
+      title.innerText = json.title;
+      boo.appendChild(title);
 
-      boo.innerText='';
-
-      for (var i = 0; i < json.length; i++) {
+      for (var i = 0; i < bars.length; i++) {
         var div = document.createElement("div");
-        /**for test*/
-        // var bar = jsonString[i]
-        var bar = json[i]
-        
+        var bar = bars[i];
+
         var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
         renderer.resize(315, 110);
         var context = renderer.getContext();
@@ -49,7 +57,7 @@
         beams.forEach(function (b) { b.setContext(context).draw() })
 
         var ties = getTies(bar, notes)
-        ties.forEach(function(t) {t.setContext(context).draw()})
+        ties.forEach(function (t) { t.setContext(context).draw() })
 
         boo.appendChild(div)
       }

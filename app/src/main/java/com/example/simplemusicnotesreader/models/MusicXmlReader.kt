@@ -1,11 +1,67 @@
 package com.example.simplemusicnotesreader.models
 
 import com.example.simplemusicnotesreader.enums.Tie
+import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import java.lang.Exception
 
+
+fun musicXmlReader(doc: Document): musicSheet {
+    val barList = doc.getElementsByTagName("measure")
+    val bars = getBarsDatas(barList)
+    var title = ""
+
+    /**Some sheet doesn't have title*/
+    val credit = doc.getElementsByTagName("credit")
+    if (credit.length > 0) {
+        title = getNodeValue("credit-words", credit.item(0) as Element)
+        title = title.replace("\t", "")
+        title = title.replace("\n", "")
+    }
+
+    var barWidth = 300
+    var barHeight = 10
+
+    return musicSheet(title, barWidth, barHeight, bars)
+
+}
+
+fun getBarsDatas(docs: NodeList): ArrayList<barData> {
+    var division = 0
+    var speed = 0
+    var barTime =0L
+    var timeSignation = ""
+    var keySignation = ""
+    val bars = ArrayList<barData>()
+    for (i in 0..docs.length - 1) {
+        val measure = docs.item(i)
+
+        /**attributes part*/
+        val barattr = (measure as Element).getElementsByTagName("attributes")
+        if (barattr.length != 0) {
+            val newDivision = getDivisions(barattr)
+            division = if (newDivision != 0) newDivision else division
+            timeSignation = getTimeSignature(barattr)
+            keySignation = getkeySignature(barattr)
+
+            val tempspeed = getSpeed(measure)
+            speed = if (tempspeed != "") tempspeed.toInt() else speed
+            barTime = (((speed * timeSignation.get(0).toString().toInt()) * 1000) / 60).toLong()
+
+        } else {
+            timeSignation = ""
+        }
+
+        val notes = getNotes(measure)
+
+        /**Now for test use fixed width and height after test should use phone screen size*/
+        val bar = barData(timeSignation, keySignation, notes, getTies(notes), barTime)
+        bars.add(bar)
+    }
+    return bars
+}
 
 fun getDivisions(barattr: NodeList): Int {
     var divisions = getNodeValue("divisions", barattr.item(0) as Element)
@@ -23,6 +79,8 @@ fun getTimeSignature(barattr: NodeList): String {
 
 fun getkeySignature(barattr: NodeList) =
     majorCorverter(getNodeValue("fifths", barattr.item(0) as Element))
+
+fun getSpeed(bar: Node) = getNodeValue("per-minute", bar as Element)
 
 fun getTies(notes: ArrayList<note>): ArrayList<tie> {
     var ties = ArrayList<tie>()
@@ -111,7 +169,6 @@ fun durationCorverter(xmlDuration: String, isRest: Boolean): String {
         /**If is whole rest note didn't have type*/
         corvertedDuration = if (corvertedDuration == "") "1" else corvertedDuration
         corvertedDuration += "r"
-
     }
 
     return corvertedDuration
@@ -127,44 +184,18 @@ fun majorCorverter(key: String): String {
         "3" -> majorString = "A"
         "4" -> majorString = "E"
         "5" -> majorString = "B"
-        "6" -> majorString = "#F"
-        "7" -> majorString = "#C"
+        "6" -> majorString = "F#"
+        "7" -> majorString = "C#"
 
         "-1" -> majorString = "F"
-        "-2" -> majorString = "bB"
-        "-3" -> majorString = "bE"
-        "-4" -> majorString = "bA"
-        "-5" -> majorString = "bD"
-        "-6" -> majorString = "bG"
-        "-7" -> majorString = "bC"
+        "-2" -> majorString = "Bb"
+        "-3" -> majorString = "Eb"
+        "-4" -> majorString = "Ab"
+        "-5" -> majorString = "Db"
+        "-6" -> majorString = "Gb"
+        "-7" -> majorString = "Cb"
     }
     return majorString
 }
 
-fun xmldocListCorvertTobarDataList(docs: NodeList): ArrayList<barData> {
-    var division = 0
-    var timeSignation = ""
-    var keySignation = ""
-    val bars = ArrayList<barData>()
-    for (i in 0..docs.length - 1) {
-        val measure = docs.item(i)
 
-        /**attributes part*/
-        val barattr = (measure as Element).getElementsByTagName("attributes")
-        if (barattr.length != 0) {
-            val newDivision = getDivisions(barattr)
-            division = if (newDivision != 0) newDivision else division
-            timeSignation = getTimeSignature(barattr)
-            keySignation = getkeySignature(barattr)
-        } else {
-            timeSignation = ""
-        }
-
-        val notes = getNotes(measure)
-
-        /**Now for test use fixed width and height after test should use phone screen size*/
-        val bar = barData(timeSignation, keySignation, notes, getTies(notes), 300, 10, 60)
-        bars.add(bar)
-    }
-    return bars
-}

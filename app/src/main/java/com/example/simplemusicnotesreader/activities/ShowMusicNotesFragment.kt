@@ -3,28 +3,28 @@ package com.example.simplemusicnotesreader.activities
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
-import android.util.DisplayMetrics
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.example.simplemusicnotesreader.R
 import com.example.simplemusicnotesreader.databinding.FragmentShowMusicNotesBinding
 import com.example.simplemusicnotesreader.factories.MusicNotesViewModelFactory
 import com.example.simplemusicnotesreader.models.parseXml
-import com.example.simplemusicnotesreader.models.xmldocListCorvertTobarDataList
+import com.example.simplemusicnotesreader.models.musicXmlReader
 import com.example.simplemusicnotesreader.viewmodels.MusicNotesViewModel
 import com.google.gson.Gson
-
+import android.animation.ObjectAnimator
+import android.view.animation.LinearInterpolator
 
 class ShowMusicNotesFragment : Fragment() {
 
     private lateinit var musicNotesViewModel: MusicNotesViewModel
     private lateinit var viewModelFactory: MusicNotesViewModelFactory
-    private lateinit var browser:WebView
+    private lateinit var browser: WebView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -37,7 +37,7 @@ class ShowMusicNotesFragment : Fragment() {
     ): View? {
         val binding: FragmentShowMusicNotesBinding = DataBindingUtil.inflate(
             inflater,
-            R.layout.fragment_show_music_notes, container, false
+            com.example.simplemusicnotesreader.R.layout.fragment_show_music_notes, container, false
         )
 
         viewModelFactory = MusicNotesViewModelFactory()
@@ -55,6 +55,7 @@ class ShowMusicNotesFragment : Fragment() {
 
         /**webView setting*/
         browser = binding.notesWebView
+        browser.isVerticalFadingEdgeEnabled = false
         val settings = browser.settings
         settings.javaScriptCanOpenWindowsAutomatically = true
         settings.javaScriptEnabled = true
@@ -62,6 +63,31 @@ class ShowMusicNotesFragment : Fragment() {
         settings.domStorageEnabled = true
         browser.loadUrl("file:///android_asset/musicnotes.html")
 
+
+        musicNotesViewModel.isPlaying.observe(this, Observer { isPlaying ->
+            val timePreBar = musicNotesViewModel.barTime.value?:0L
+            val height = (browser.contentHeight * browser.scale) - browser.height
+            /**if barCount is null mean hadn't open file*/
+            if (musicNotesViewModel.barCount.value != null) {
+
+                /**If timePreBar is 0 means that file doesn't speed data so ask user input speed*/
+                if(timePreBar == 0L){
+
+                }
+
+                browser.scrollTo(0, 0)
+
+                val barCount = musicNotesViewModel.barCount.value!!
+                val anim = ObjectAnimator.ofInt(
+                    browser,
+                    "scrollY",
+                    0, height.toInt()
+                )
+                /**Even speed*/
+                anim.setInterpolator(LinearInterpolator())
+                anim.setDuration(barCount * timePreBar).start()
+            }
+        })
 
         binding.musicNotesViewModel = musicNotesViewModel
         binding.setLifecycleOwner(this)
@@ -74,14 +100,14 @@ class ShowMusicNotesFragment : Fragment() {
         if (requestCode == 111 && resultCode == RESULT_OK) {
             val selectedFile = data?.data
             val inputStream = activity?.contentResolver?.openInputStream(selectedFile!!)
+
+
             var doc = parseXml(inputStream!!)
-            val barList = doc.getElementsByTagName("measure")
-            val bars = xmldocListCorvertTobarDataList(barList)
+            var sheetData = musicXmlReader(doc)
 
             /**Convert to json*/
             var gson = Gson()
-            var jsonString: String = gson.toJson(bars)
-
+            var jsonString: String = gson.toJson(sheetData)
             browser.post {
                 run {
                     var url = "javascript:Drawmusicnotes('$jsonString')"
@@ -89,7 +115,7 @@ class ShowMusicNotesFragment : Fragment() {
                 }
             }
 
-            musicNotesViewModel.OpenFileFinish()
+            musicNotesViewModel.OpenFileFinish(sheetData.barDatas.size,sheetData.barDatas.get(0).barTime)
         }
     }
 

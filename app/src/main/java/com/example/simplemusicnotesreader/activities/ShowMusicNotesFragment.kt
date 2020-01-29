@@ -21,10 +21,10 @@ import android.animation.ObjectAnimator
 import android.view.animation.LinearInterpolator
 
 class ShowMusicNotesFragment : Fragment() {
-
     private lateinit var musicNotesViewModel: MusicNotesViewModel
     private lateinit var viewModelFactory: MusicNotesViewModelFactory
     private lateinit var browser: WebView
+    private lateinit var anim: ObjectAnimator
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -46,11 +46,16 @@ class ShowMusicNotesFragment : Fragment() {
 
         /**Select musicXMl File*/
         binding.openFileBtn.setOnClickListener { view ->
+            /**If is playing stop it*/
+            if(::anim.isInitialized){
+                /**Scroll stop*/
+                anim.cancel()
+            }
+
             val intent = Intent()
                 .setType("*/*")
                 .setAction(Intent.ACTION_GET_CONTENT)
             startActivityForResult(Intent.createChooser(intent, "Select musicXml File"), 111)
-
         }
 
         /**webView setting*/
@@ -65,27 +70,33 @@ class ShowMusicNotesFragment : Fragment() {
 
 
         musicNotesViewModel.isPlaying.observe(this, Observer { isPlaying ->
-            val timePreBar = musicNotesViewModel.barTime.value?:0L
-            val height = (browser.contentHeight * browser.scale) - browser.height
-            /**if barCount is null mean hadn't open file*/
-            if (musicNotesViewModel.barCount.value != null) {
+            if(isPlaying){
+                val timePreBar = musicNotesViewModel.barTime.value ?: 0L
+                val height = (browser.contentHeight * browser.scale) - browser.height
+                /**if barCount is null mean hadn't open file*/
+                if (musicNotesViewModel.barCount.value != null) {
+                    /**If timePreBar is 0 means that file doesn't speed data so ask user input speed*/
+                    if (timePreBar == 0L) {
 
-                /**If timePreBar is 0 means that file doesn't speed data so ask user input speed*/
-                if(timePreBar == 0L){
+                    }
 
+                    browser.scrollTo(0, 0)
+
+                    val barCount = musicNotesViewModel.barCount.value!!
+                    anim = ObjectAnimator.ofInt(
+                        browser,
+                        "scrollY",
+                        0, height.toInt()
+                    )
+                    /**Even speed*/
+                    anim.setInterpolator(LinearInterpolator())
+                    anim.setDuration(barCount * timePreBar).start()
                 }
-
-                browser.scrollTo(0, 0)
-
-                val barCount = musicNotesViewModel.barCount.value!!
-                val anim = ObjectAnimator.ofInt(
-                    browser,
-                    "scrollY",
-                    0, height.toInt()
-                )
-                /**Even speed*/
-                anim.setInterpolator(LinearInterpolator())
-                anim.setDuration(barCount * timePreBar).start()
+            }else{
+                if(::anim.isInitialized){
+                    /**Scroll stop*/
+                    anim.cancel()
+                }
             }
         })
 
@@ -115,7 +126,10 @@ class ShowMusicNotesFragment : Fragment() {
                 }
             }
 
-            musicNotesViewModel.OpenFileFinish(sheetData.barDatas.size,sheetData.barDatas.get(0).barTime)
+            musicNotesViewModel.OpenFileFinish(
+                sheetData.barDatas.size,
+                sheetData.barDatas.get(0).barTime
+            )
         }
     }
 

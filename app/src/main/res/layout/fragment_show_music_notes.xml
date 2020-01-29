@@ -21,6 +21,7 @@
             android:id="@+id/notesWebView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:scrollbars="none"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -28,21 +29,21 @@
         <Button
             android:id="@+id/openFileBtn"
             android:layout_width="107dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_marginStart="72dp"
             android:layout_marginBottom="32dp"
             android:text="Open File"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <Button
+        <ImageButton
             android:id="@+id/playBtn"
-            android:layout_width="88dp"
-            android:layout_height="wrap_content"
+            android:layout_width="97dp"
+            android:layout_height="60dp"
             android:layout_marginEnd="75dp"
             android:enabled="@{Boolean.valueOf(musicNotesViewModel.isPlayBtnEnable)}"
             android:onClick="@{() -> musicNotesViewModel.OnPlay()}"
-            android:text="Play"
+            android:src="@{(Boolean.valueOf(musicNotesViewModel.isPlaying()) ? @drawable/ic_pause_foreground : @drawable/ic_play_foreground)}"
             app:layout_constraintBottom_toBottomOf="@+id/openFileBtn"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
@@ -61,5 +62,4 @@
             app:layout_constraintTop_toTopOf="@+id/notesWebView"
             app:srcCompat="@drawable/title_img" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-    <!--    android:onClick="@{(view)->musicNotesViewModel.onOpenFile(view)}"-->
 </layout>

@@ -31,7 +31,9 @@ fun musicXmlReader(doc: Document): musicSheet {
 fun getBarsDatas(docs: NodeList): ArrayList<barData> {
     var division = 0
     var speed = 0
-    var barTime =0L
+    var barTime = 0L
+    var repeatStartIndex = 0
+    var repeatEndIndex = 0
     var timeSignation = ""
     var keySignation = ""
     val bars = ArrayList<barData>()
@@ -48,7 +50,8 @@ fun getBarsDatas(docs: NodeList): ArrayList<barData> {
 
             val tempspeed = getSpeed(measure)
             speed = if (tempspeed != "") tempspeed.toInt() else speed
-            barTime = (((speed * timeSignation.get(0).toString().toInt()) * 1000) / 60).toLong()
+            barTime =
+                (((60F / speed) * (timeSignation.get(0).toString().toFloat() * 1000))).toLong()
 
         } else {
             timeSignation = ""
@@ -59,6 +62,19 @@ fun getBarsDatas(docs: NodeList): ArrayList<barData> {
         /**Now for test use fixed width and height after test should use phone screen size*/
         val bar = barData(timeSignation, keySignation, notes, getTies(notes), barTime)
         bars.add(bar)
+
+        /**If have repeat add to bars*/
+        val repeat = (measure as Element).getElementsByTagName("repeat")
+        if (repeat.length > 0) {
+            val tieString = repeat.item(0).attributes.getNamedItem("direction").nodeValue
+            if (tieString == "forward") {
+                repeatStartIndex = i
+            } else if (tieString == "backward") {
+                repeatEndIndex = i
+                bars.addAll(bars.subList(repeatStartIndex, repeatEndIndex))
+            }
+        }
+
     }
     return bars
 }
@@ -139,13 +155,31 @@ fun getNotes(measure: Node): ArrayList<note> {
             }
 
             val type = durationCorverter(getNodeValue("type", note as Element), isRest)
-            notes.add(note(key, type, tie, haveDot))
+            val accidental = accidentalCorverter(getNodeValue("accidental", note as Element))
+            notes.add(note(key, type, accidental, tie, haveDot))
 
         } catch (e: Exception) {
             print(i.toString())
         }
     }
     return notes
+}
+
+fun accidentalCorverter(xmlaccidental: String): String {
+    var corvertedAccidental = ""
+    when (xmlaccidental) {
+        "double-sharp" ->
+            corvertedAccidental = "##"
+        "sharp" ->
+            corvertedAccidental = "#"
+        "natural" ->
+            corvertedAccidental = "n"
+        "flat" ->
+            corvertedAccidental = "b"
+        "flat-flat" ->
+            corvertedAccidental = "bb"
+    }
+    return corvertedAccidental
 }
 
 fun durationCorverter(xmlDuration: String, isRest: Boolean): String {

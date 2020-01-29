@@ -27,18 +27,10 @@ data class barData(
 data class note(
     val key: String,
     val type: String,
+    val accidental:String,
     val tie: Tie,
     val haveDot: Boolean
 ) : Parcelable
-
-//@Parcelize
-//data class note(
-//    val key: String,
-//    val duration: Float,
-//    val tie: Tie,
-//    val isRest: Boolean,
-//    val haveDot: Boolean
-//) : Parcelable
 
 @Parcelize
 data class tie(val start: Int, val end: Int) : Parcelable

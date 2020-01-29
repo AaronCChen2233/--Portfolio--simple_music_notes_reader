@@ -19,6 +19,7 @@ import com.example.simplemusicnotesreader.viewmodels.MusicNotesViewModel
 import com.google.gson.Gson
 import android.animation.ObjectAnimator
 import android.view.animation.LinearInterpolator
+import androidx.core.animation.doOnEnd
 
 class ShowMusicNotesFragment : Fragment() {
     private lateinit var musicNotesViewModel: MusicNotesViewModel
@@ -47,7 +48,7 @@ class ShowMusicNotesFragment : Fragment() {
         /**Select musicXMl File*/
         binding.openFileBtn.setOnClickListener { view ->
             /**If is playing stop it*/
-            if(::anim.isInitialized){
+            if (::anim.isInitialized) {
                 /**Scroll stop*/
                 anim.cancel()
             }
@@ -70,7 +71,7 @@ class ShowMusicNotesFragment : Fragment() {
 
 
         musicNotesViewModel.isPlaying.observe(this, Observer { isPlaying ->
-            if(isPlaying){
+            if (isPlaying) {
                 val timePreBar = musicNotesViewModel.barTime.value ?: 0L
                 val height = (browser.contentHeight * browser.scale) - browser.height
                 /**if barCount is null mean hadn't open file*/
@@ -90,12 +91,18 @@ class ShowMusicNotesFragment : Fragment() {
                     )
                     /**Even speed*/
                     anim.setInterpolator(LinearInterpolator())
+                    anim.doOnEnd {
+                        musicNotesViewModel.OnPlayEnd()
+                    }
                     anim.setDuration(barCount * timePreBar).start()
                 }
-            }else{
-                if(::anim.isInitialized){
+            } else {
+                if (::anim.isInitialized) {
                     /**Scroll stop*/
                     anim.cancel()
+                    if(musicNotesViewModel.isStop.value!!){
+                        browser.scrollTo(0, 0)
+                    }
                 }
             }
         })

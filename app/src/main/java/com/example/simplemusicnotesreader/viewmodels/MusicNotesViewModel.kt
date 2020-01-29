@@ -23,6 +23,11 @@ class MusicNotesViewModel : ViewModel() {
     val isPlaying: LiveData<Boolean>
         get() = _isPlaying
 
+    private val _isStop = MutableLiveData<Boolean>()
+
+    val isStop: LiveData<Boolean>
+        get() = _isStop
+
     private val _barCount = MutableLiveData<Int>()
 
     val barCount: LiveData<Int>
@@ -36,6 +41,7 @@ class MusicNotesViewModel : ViewModel() {
     init {
         _isShowTitleImage.value = true
         _isPlaying.value = false
+        _isStop.value = false
     }
 
     fun OpenFileFinish(barCount: Int, barTime: Long) {
@@ -45,7 +51,13 @@ class MusicNotesViewModel : ViewModel() {
         _barCount.value = barCount
     }
 
-    fun OnPlay() {
+    /**Play and Stop are same button click will change function*/
+    fun OnPlayOrStop() {
+        _isStop.value = _isPlaying.value
         _isPlaying.value = !_isPlaying.value!!
+    }
+
+    fun OnPlayEnd(){
+        _isPlaying.value = false
     }
 }

@@ -6,14 +6,17 @@
   <title>Document</title>
 </head>
 <style>
-h2{
-  text-align: center;
-}
+  h2 {
+    text-align: center;
+  }
+  #boo{
+    margin-bottom :114px
+  }
 </style>
 
 
 <body>
-  <div id="boo"></div>
+  <div id="boo" ></div>
   <script src="vexflow-min.js"></script>
   <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
   <script type="text/javascript">
@@ -34,7 +37,7 @@ h2{
 
       var bars = json.barDatas;
       var title = document.createElement("h2");
-      title.setAttribute("id","title")
+      title.setAttribute("id", "title")
       title.innerText = json.title;
       boo.appendChild(title);
 
@@ -80,6 +83,10 @@ h2{
       var notes = []
       bar.notes.forEach(function (note) {
         var vfnote = new VF.StaveNote({ keys: [note.key], duration: note.type });
+
+        if (note.accidental != "") {
+          vfnote.addAccidental(0, new VF.Accidental(note.accidental))
+        }
         if (note.haveDot) {
           vfnote.addDotToAll()
         }
@@ -99,92 +106,6 @@ h2{
       })
       return ties
     }
-
-    // function durationCorverter(xmlDuration, isRest) {
-    //   var corvertedDuration = "";
-    //   switch (xmlDuration) {
-    //     case "32nd":
-    //       corvertedDuration = "32";
-    //       break;
-    //     case "16th":
-    //       corvertedDuration = "16";
-    //       break;
-    //     case "eighth":
-    //       corvertedDuration = "8";
-    //       break;
-    //     case "quarter":
-    //       corvertedDuration = "4";
-    //       break;
-    //     case "half":
-    //       corvertedDuration = "2";
-    //       break;
-    //     case "whole":
-    //       corvertedDuration = "1";
-    //       break;
-    //     default:
-    //       debugger;
-    //   }
-
-    //   if (isRest) {
-    //     corvertedDuration = corvertedDuration + "r";
-    //     debugger;
-    //   }
-
-    //   return corvertedDuration
-    // }
-
-// musictest("e/4")
-
-
-// function musictest(notstr){
-//   VF = Vex.Flow;
-// // Create an SVG renderer and attach it to the DIV element named "boo".
-// var div = document.getElementById("boo")
-// var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
-// // Configure the rendering context.
-// renderer.resize(500, 110);
-// var context = renderer.getContext();
-
-// // Create a stave of width 400 at position 10, 40 on the canvas.
-// var stave = new VF.Stave(10, 0, 300);
-
-// var manager = new VF.KeyManager('g');
-// // Add a clef and time signature.
-// stave.addClef("treble").addTimeSignature("4/4")//.addKeySignature('B');
-
-// // Connect it to the rendering context and draw!
-// stave.setContext(context).draw();
-
-// var notes = [
-//   new VF.StaveNote({clef: "treble", keys: [notstr], duration: "8d" })
-//       .addAccidental(0, new VF.Accidental("##")).addDotToAll(),
-//   new VF.StaveNote({clef: "treble", keys: ["b/4"], duration: "16" }).
-//       addAccidental(0, new VF.Accidental("b")),
-//   new VF.StaveNote({clef: "treble", keys: ["g/3"], duration: "8" }),
-//   new VF.StaveNote({clef: "treble", keys: ["d/4"], duration: "16" }),
-//   new VF.StaveNote({clef: "treble", keys: ["d/4"], duration: "16" }),
-//   new VF.StaveNote({clef: "treble", keys: ["d/4"], duration: "q" }),
-//   new VF.StaveNote({clef: "treble", keys: ["d/4"], duration: "q" })
-// ];
-
-// var beams = VF.Beam.generateBeams(notes);
-// VF.Formatter.FormatAndDraw(context, stave, notes);
-// beams.forEach(function(b) {b.setContext(context).draw()})
-
-// /*Ties part*/
-// var ties = [
-//   new VF.StaveTie({
-//     first_note: notes[4],
-//     last_note: notes[5]
-//   }),
-//   new VF.StaveTie({
-//     first_note: notes[5],
-//     last_note: notes[6]
-//   })
-// ];
-
-// ties.forEach(function(t) {t.setContext(context).draw()})
-// }
 
   </script>
 </body>

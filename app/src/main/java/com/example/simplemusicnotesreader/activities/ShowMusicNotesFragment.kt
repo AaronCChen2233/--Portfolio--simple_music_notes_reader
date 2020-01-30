@@ -1,30 +1,29 @@
 package com.example.simplemusicnotesreader.activities
 
+import android.animation.ObjectAnimator
 import android.app.Activity.RESULT_OK
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.text.InputType
+import android.view.*
+import android.view.animation.LinearInterpolator
 import android.webkit.WebView
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.Toast
+import androidx.core.animation.doOnEnd
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.example.simplemusicnotesreader.R
 import com.example.simplemusicnotesreader.databinding.FragmentShowMusicNotesBinding
 import com.example.simplemusicnotesreader.factories.MusicNotesViewModelFactory
-import com.example.simplemusicnotesreader.models.parseXml
 import com.example.simplemusicnotesreader.models.musicXmlReader
+import com.example.simplemusicnotesreader.models.parseXml
 import com.example.simplemusicnotesreader.viewmodels.MusicNotesViewModel
 import com.google.gson.Gson
-import android.animation.ObjectAnimator
-import android.app.AlertDialog
-import android.text.InputType
-import android.view.animation.LinearInterpolator
-import android.widget.EditText
-import androidx.core.animation.doOnEnd
-import com.example.simplemusicnotesreader.models.corvertSpeedtobarTime
-
 
 class ShowMusicNotesFragment : Fragment() {
     var CSpeed = 0
@@ -45,26 +44,18 @@ class ShowMusicNotesFragment : Fragment() {
     ): View? {
         val binding: FragmentShowMusicNotesBinding = DataBindingUtil.inflate(
             inflater,
-            com.example.simplemusicnotesreader.R.layout.fragment_show_music_notes, container, false
+            R.layout.fragment_show_music_notes, container, false
         )
 
         viewModelFactory = MusicNotesViewModelFactory()
         musicNotesViewModel =
             ViewModelProviders.of(this, viewModelFactory).get(MusicNotesViewModel::class.java)
 
-        /**Select musicXMl File*/
-        binding.openFileBtn.setOnClickListener { view ->
-            /**If is playing stop it*/
-            if (::anim.isInitialized) {
-                /**Scroll stop*/
-                anim.cancel()
-            }
 
-            val intent = Intent()
-                .setType("*/*")
-                .setAction(Intent.ACTION_GET_CONTENT)
-            startActivityForResult(Intent.createChooser(intent, "Select musicXml File"), 111)
-        }
+//        binding.openFileBtn.setOnClickListener { view ->
+//
+//            openFile()
+//        }
 
         /**webView setting*/
         browser = binding.notesWebView
@@ -85,10 +76,8 @@ class ShowMusicNotesFragment : Fragment() {
                 if (musicNotesViewModel.barCount.value != null) {
                     /**If timePreBar is 0 means that file doesn't speed data so ask user input speed*/
                     if (timePreBar == 0L) {
-                        showAskSpeedDialog()
+                        showAskTempoDialog()
                         musicNotesViewModel.onPlayOrStop()
-//                        val sharedPref: SharedPreferences? =
-//                            this.getActivity()?.getSharedPreferences(CUSTOMSPEED, CSpeed)
                     }
 
                     browser.scrollTo(0, 0)
@@ -117,14 +106,25 @@ class ShowMusicNotesFragment : Fragment() {
             }
         })
 
-
-
-
+        setHasOptionsMenu(true)
 
         binding.musicNotesViewModel = musicNotesViewModel
         binding.setLifecycleOwner(this)
 
         return binding.root
+    }
+
+    private fun openFile() {
+        /**If is playing stop it*/
+        if (::anim.isInitialized) {
+            /**Scroll stop*/
+            anim.cancel()
+        }
+
+        val intent = Intent()
+            .setType("*/*")
+            .setAction(Intent.ACTION_GET_CONTENT)
+        startActivityForResult(Intent.createChooser(intent, "Select musicXml File"), 111)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -150,33 +150,64 @@ class ShowMusicNotesFragment : Fragment() {
         }
     }
 
-    fun showAskSpeedDialog() {
-        var cSpeed = 0
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater?.inflate(R.menu.option_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.openfile ->{
+                /**Select musicXMl File*/
+                openFile()
+                true
+            }
+            R.id.setting ->{
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    fun showAskTempoDialog() {
+        var cTempo = 0
         val builder: AlertDialog.Builder = AlertDialog.Builder(this.activity)
-        builder.setTitle("Please input speed")
-        builder.setMessage("This Music Source File doesn't have speed data\nPlease input speed(Beats Per Minute)")
+        builder.setTitle("Please input the tempo")
+        builder.setMessage("This Music Source File doesn't have tempo data\nPlease input the tempo(Beats Per Minute)")
         builder.setCancelable(false)
         val input = EditText(this.activity)
+
+        input.setSingleLine()
+        var container = FrameLayout(this.activity!!)
+
+        val params = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_margin)
+        params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_margin)
+        input.layoutParams = params
+        container.addView(input)
+
+
         input.inputType = InputType.TYPE_CLASS_NUMBER
-        builder.setView(input)
+        builder.setView(container)
         builder.setPositiveButton("OK", null)
         val dialog = builder.create()
         dialog.show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(View.OnClickListener
         { v ->
-
             val inputString = input.text.toString()
             if (inputString == "") {
-
+                Toast.makeText(context, "Please input the Tempo", Toast.LENGTH_SHORT).show()
             } else if (inputString == "0") {
-
+                Toast.makeText(context, "The tempo must greater than 0", Toast.LENGTH_SHORT).show()
             } else {
-                cSpeed = inputString.toInt()
-                musicNotesViewModel.reSetbarTime(cSpeed)
+                cTempo = inputString.toInt()
+                musicNotesViewModel.reSetbarTime(cTempo)
                 musicNotesViewModel.onPlayOrStop()
                 dialog.dismiss()
             }
         })
     }
-
 }

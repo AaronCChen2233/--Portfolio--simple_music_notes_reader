@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <import type="android.view.View" />
-
         <variable
             name="musicNotesViewModel"
             type="com.example.simplemusicnotesreader.viewmodels.MusicNotesViewModel" />
@@ -24,31 +22,19 @@
             android:scrollbars="none"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent" >
 
-        <Button
-            android:id="@+id/openFileBtn"
-            android:layout_width="107dp"
-            android:layout_height="60dp"
-            android:layout_marginStart="72dp"
-            android:layout_marginBottom="32dp"
-            android:text="Open File"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+        </WebView>
 
-        <ImageButton
-            android:id="@+id/playBtn"
-            android:layout_width="97dp"
-            android:layout_height="60dp"
-            android:layout_marginEnd="75dp"
-            android:enabled="@{Boolean.valueOf(musicNotesViewModel.isPlayBtnEnable)}"
-            android:onClick="@{() -> musicNotesViewModel.onPlayOrStop()}"
-            android:src="@{(Boolean.valueOf(musicNotesViewModel.isPlaying()) ? @drawable/ic_stop_foreground : @drawable/ic_play_foreground)}"
-            app:layout_constraintBottom_toBottomOf="@+id/openFileBtn"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/openFileBtn"
-            app:layout_constraintTop_toTopOf="@+id/openFileBtn" />
+<!--        <Button-->
+<!--            android:id="@+id/openFileBtn"-->
+<!--            android:layout_width="107dp"-->
+<!--            android:layout_height="60dp"-->
+<!--            android:layout_marginStart="72dp"-->
+<!--            android:layout_marginBottom="32dp"-->
+<!--            android:text="Open File"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent" />-->
 
         <ImageView
             android:id="@+id/imageView"
@@ -61,5 +47,19 @@
             app:layout_constraintStart_toStartOf="@+id/notesWebView"
             app:layout_constraintTop_toTopOf="@+id/notesWebView"
             app:srcCompat="@drawable/title_img" />
+
+        <ImageButton
+            android:id="@+id/playBtn"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginBottom="50dp"
+            android:visibility="@{(Boolean.valueOf(musicNotesViewModel.isShowTitleImage()) ? View.GONE : View.VISIBLE )}"
+            android:enabled="@{Boolean.valueOf(musicNotesViewModel.isPlayBtnEnable)}"
+            android:onClick="@{() -> musicNotesViewModel.onPlayOrStop()}"
+            android:src="@{(Boolean.valueOf(musicNotesViewModel.isPlaying()) ? @drawable/ic_stop_foreground : @drawable/ic_play_foreground)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

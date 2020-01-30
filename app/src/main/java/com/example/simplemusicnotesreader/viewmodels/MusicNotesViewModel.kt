@@ -3,15 +3,16 @@ package com.example.simplemusicnotesreader.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.simplemusicnotesreader.models.corvertSpeedtobarTime
+import com.example.simplemusicnotesreader.models.musicSheet
 
 
 class MusicNotesViewModel : ViewModel() {
-
+    var musicSheet: musicSheet? = null
     private val _isPlayBtnEnable = MutableLiveData<Boolean>()
 
     val isPlayBtnEnable: LiveData<Boolean>
         get() = _isPlayBtnEnable
-
 
     private val _isShowTitleImage = MutableLiveData<Boolean>()
 
@@ -44,20 +45,27 @@ class MusicNotesViewModel : ViewModel() {
         _isStop.value = false
     }
 
-    fun OpenFileFinish(barCount: Int, barTime: Long) {
-        _barTime.value = barTime
+    fun openFileFinish(sheetData: musicSheet) {
+        _barTime.value = sheetData.barDatas.get(0).barTime
         _isPlayBtnEnable.value = true
         _isShowTitleImage.value = false
-        _barCount.value = barCount
+        _barCount.value = sheetData.barDatas.size
+        musicSheet = sheetData
     }
 
     /**Play and Stop are same button click will change function*/
-    fun OnPlayOrStop() {
+    fun onPlayOrStop() {
         _isStop.value = _isPlaying.value
         _isPlaying.value = !_isPlaying.value!!
     }
 
-    fun OnPlayEnd(){
+    fun onPlayEnd() {
         _isPlaying.value = false
+    }
+
+    fun reSetbarTime(newTime: Int) {
+        /**Get beat from first bar timeSignature just for now
+         * because now hadn't support different barTime*/
+        _barTime.value = corvertSpeedtobarTime(newTime, musicSheet!!.barDatas[0].timeSignature.get(0).toString().toInt())
     }
 }

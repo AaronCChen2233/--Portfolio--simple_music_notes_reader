@@ -12,7 +12,6 @@ data class musicSheet(
     val barDatas: ArrayList<barData>
 )
 
-
 @Parcelize
 data class barData(
     val timeSignature: String,
@@ -21,7 +20,6 @@ data class barData(
     val ties: ArrayList<tie>,
     val barTime: Long
 ) : Parcelable
-
 
 @Parcelize
 data class note(

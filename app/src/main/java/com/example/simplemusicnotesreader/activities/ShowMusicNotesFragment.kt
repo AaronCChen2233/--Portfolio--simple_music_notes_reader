@@ -18,10 +18,17 @@ import com.example.simplemusicnotesreader.models.musicXmlReader
 import com.example.simplemusicnotesreader.viewmodels.MusicNotesViewModel
 import com.google.gson.Gson
 import android.animation.ObjectAnimator
+import android.app.AlertDialog
+import android.text.InputType
 import android.view.animation.LinearInterpolator
+import android.widget.EditText
 import androidx.core.animation.doOnEnd
+import com.example.simplemusicnotesreader.models.corvertSpeedtobarTime
+
 
 class ShowMusicNotesFragment : Fragment() {
+    var CSpeed = 0
+    val CUSTOMSPEED = "MySpeed"
     private lateinit var musicNotesViewModel: MusicNotesViewModel
     private lateinit var viewModelFactory: MusicNotesViewModelFactory
     private lateinit var browser: WebView
@@ -78,7 +85,10 @@ class ShowMusicNotesFragment : Fragment() {
                 if (musicNotesViewModel.barCount.value != null) {
                     /**If timePreBar is 0 means that file doesn't speed data so ask user input speed*/
                     if (timePreBar == 0L) {
-
+                        showAskSpeedDialog()
+                        musicNotesViewModel.onPlayOrStop()
+//                        val sharedPref: SharedPreferences? =
+//                            this.getActivity()?.getSharedPreferences(CUSTOMSPEED, CSpeed)
                     }
 
                     browser.scrollTo(0, 0)
@@ -92,7 +102,7 @@ class ShowMusicNotesFragment : Fragment() {
                     /**Even speed*/
                     anim.setInterpolator(LinearInterpolator())
                     anim.doOnEnd {
-                        musicNotesViewModel.OnPlayEnd()
+                        musicNotesViewModel.onPlayEnd()
                     }
                     anim.setDuration(barCount * timePreBar).start()
                 }
@@ -100,12 +110,16 @@ class ShowMusicNotesFragment : Fragment() {
                 if (::anim.isInitialized) {
                     /**Scroll stop*/
                     anim.cancel()
-                    if(musicNotesViewModel.isStop.value!!){
+                    if (musicNotesViewModel.isStop.value!!) {
                         browser.scrollTo(0, 0)
                     }
                 }
             }
         })
+
+
+
+
 
         binding.musicNotesViewModel = musicNotesViewModel
         binding.setLifecycleOwner(this)
@@ -118,7 +132,6 @@ class ShowMusicNotesFragment : Fragment() {
         if (requestCode == 111 && resultCode == RESULT_OK) {
             val selectedFile = data?.data
             val inputStream = activity?.contentResolver?.openInputStream(selectedFile!!)
-
 
             var doc = parseXml(inputStream!!)
             var sheetData = musicXmlReader(doc)
@@ -133,11 +146,37 @@ class ShowMusicNotesFragment : Fragment() {
                 }
             }
 
-            musicNotesViewModel.OpenFileFinish(
-                sheetData.barDatas.size,
-                sheetData.barDatas.get(0).barTime
-            )
+            musicNotesViewModel.openFileFinish(sheetData)
         }
+    }
+
+    fun showAskSpeedDialog() {
+        var cSpeed = 0
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this.activity)
+        builder.setTitle("Please input speed")
+        builder.setMessage("This Music Source File doesn't have speed data\nPlease input speed(Beats Per Minute)")
+        builder.setCancelable(false)
+        val input = EditText(this.activity)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        builder.setView(input)
+        builder.setPositiveButton("OK", null)
+        val dialog = builder.create()
+        dialog.show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(View.OnClickListener
+        { v ->
+
+            val inputString = input.text.toString()
+            if (inputString == "") {
+
+            } else if (inputString == "0") {
+
+            } else {
+                cSpeed = inputString.toInt()
+                musicNotesViewModel.reSetbarTime(cSpeed)
+                musicNotesViewModel.onPlayOrStop()
+                dialog.dismiss()
+            }
+        })
     }
 
 }

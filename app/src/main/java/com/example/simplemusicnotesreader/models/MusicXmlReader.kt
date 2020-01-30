@@ -50,9 +50,7 @@ fun getBarsDatas(docs: NodeList): ArrayList<barData> {
 
             val tempspeed = getSpeed(measure)
             speed = if (tempspeed != "") tempspeed.toInt() else speed
-            barTime =
-                (((60F / speed) * (timeSignation.get(0).toString().toFloat() * 1000))).toLong()
-
+            barTime = if (speed == 0) 0 else corvertSpeedtobarTime(speed, timeSignation.get(0).toString().toInt())
         } else {
             timeSignation = ""
         }

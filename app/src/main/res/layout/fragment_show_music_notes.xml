@@ -42,7 +42,7 @@
             android:layout_height="60dp"
             android:layout_marginEnd="75dp"
             android:enabled="@{Boolean.valueOf(musicNotesViewModel.isPlayBtnEnable)}"
-            android:onClick="@{() -> musicNotesViewModel.OnPlayOrStop()}"
+            android:onClick="@{() -> musicNotesViewModel.onPlayOrStop()}"
             android:src="@{(Boolean.valueOf(musicNotesViewModel.isPlaying()) ? @drawable/ic_stop_foreground : @drawable/ic_play_foreground)}"
             app:layout_constraintBottom_toBottomOf="@+id/openFileBtn"
             app:layout_constraintEnd_toEndOf="parent"

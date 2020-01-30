@@ -34,3 +34,5 @@ fun getNodeValue(tag: String, element: Element): String {
     }
     return ""
 }
+
+fun corvertSpeedtobarTime(speed:Int, bests:Int):Long = (((60F / speed) * bests * 1000)).toLong()

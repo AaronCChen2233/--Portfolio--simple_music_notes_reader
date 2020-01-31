@@ -17,25 +17,26 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
+import androidx.navigation.ui.NavigationUI
+import androidx.preference.EditTextPreference
+import androidx.preference.PreferenceManager
 import com.example.simplemusicnotesreader.R
 import com.example.simplemusicnotesreader.databinding.FragmentShowMusicNotesBinding
 import com.example.simplemusicnotesreader.factories.MusicNotesViewModelFactory
+import com.example.simplemusicnotesreader.models.musicSheet
 import com.example.simplemusicnotesreader.models.musicXmlReader
 import com.example.simplemusicnotesreader.models.parseXml
 import com.example.simplemusicnotesreader.viewmodels.MusicNotesViewModel
 import com.google.gson.Gson
 
 class ShowMusicNotesFragment : Fragment() {
-    var CSpeed = 0
-    val CUSTOMSPEED = "MySpeed"
     private lateinit var musicNotesViewModel: MusicNotesViewModel
     private lateinit var viewModelFactory: MusicNotesViewModelFactory
     private lateinit var browser: WebView
-    private lateinit var anim: ObjectAnimator
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-        }
+
     }
 
     override fun onCreateView(
@@ -46,19 +47,15 @@ class ShowMusicNotesFragment : Fragment() {
             inflater,
             R.layout.fragment_show_music_notes, container, false
         )
+        binding.setLifecycleOwner(this)
 
         viewModelFactory = MusicNotesViewModelFactory()
         musicNotesViewModel =
             ViewModelProviders.of(this, viewModelFactory).get(MusicNotesViewModel::class.java)
 
-
-//        binding.openFileBtn.setOnClickListener { view ->
-//
-//            openFile()
-//        }
-
         /**webView setting*/
         browser = binding.notesWebView
+
         browser.isVerticalFadingEdgeEnabled = false
         val settings = browser.settings
         settings.javaScriptCanOpenWindowsAutomatically = true
@@ -67,38 +64,43 @@ class ShowMusicNotesFragment : Fragment() {
         settings.domStorageEnabled = true
         browser.loadUrl("file:///android_asset/musicnotes.html")
 
-
         musicNotesViewModel.isPlaying.observe(this, Observer { isPlaying ->
             if (isPlaying) {
+
+                val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
+                val interval = sharedPreferences.getString("interval", "")
+
                 val timePreBar = musicNotesViewModel.barTime.value ?: 0L
                 val height = (browser.contentHeight * browser.scale) - browser.height
-                /**if barCount is null mean hadn't open file*/
-                if (musicNotesViewModel.barCount.value != null) {
-                    /**If timePreBar is 0 means that file doesn't speed data so ask user input speed*/
+                /**if musicSheet is null mean hadn't open file*/
+                if (musicNotesViewModel.musicSheet != null) {
+                    /**If timePreBar is 0 means that file doesn't have tempo data so ask user input tempo*/
                     if (timePreBar == 0L) {
                         showAskTempoDialog()
+                        /**play after ask tempo*/
                         musicNotesViewModel.onPlayOrStop()
                     }
 
                     browser.scrollTo(0, 0)
 
                     val barCount = musicNotesViewModel.barCount.value!!
-                    anim = ObjectAnimator.ofInt(
+                    musicNotesViewModel.anim = ObjectAnimator.ofInt(
                         browser,
                         "scrollY",
                         0, height.toInt()
                     )
                     /**Even speed*/
-                    anim.setInterpolator(LinearInterpolator())
-                    anim.doOnEnd {
+                    musicNotesViewModel.anim?.setInterpolator(LinearInterpolator())
+                    musicNotesViewModel.anim?.doOnEnd {
                         musicNotesViewModel.onPlayEnd()
                     }
-                    anim.setDuration(barCount * timePreBar).start()
+                    musicNotesViewModel.anim?.setStartDelay(interval!!.toLong()*1000)
+                    musicNotesViewModel.anim?.setDuration(barCount * timePreBar)?.start()
                 }
             } else {
-                if (::anim.isInitialized) {
-                    /**Scroll stop*/
-                    anim.cancel()
+                if (musicNotesViewModel.anim != null) {
+                    /**Scrolling stop*/
+                    musicNotesViewModel.anim?.cancel()
                     if (musicNotesViewModel.isStop.value!!) {
                         browser.scrollTo(0, 0)
                     }
@@ -107,18 +109,16 @@ class ShowMusicNotesFragment : Fragment() {
         })
 
         setHasOptionsMenu(true)
-
         binding.musicNotesViewModel = musicNotesViewModel
-        binding.setLifecycleOwner(this)
 
         return binding.root
     }
 
     private fun openFile() {
         /**If is playing stop it*/
-        if (::anim.isInitialized) {
+        if (musicNotesViewModel.anim != null) {
             /**Scroll stop*/
-            anim.cancel()
+            musicNotesViewModel.anim?.cancel()
         }
 
         val intent = Intent()
@@ -136,17 +136,23 @@ class ShowMusicNotesFragment : Fragment() {
             var doc = parseXml(inputStream!!)
             var sheetData = musicXmlReader(doc)
 
+            webViewLoadData(sheetData)
+            musicNotesViewModel.openFileFinish(sheetData)
+        }
+    }
+
+    private fun webViewLoadData(sheetData: musicSheet?) {
+        if (sheetData != null) {
             /**Convert to json*/
             var gson = Gson()
             var jsonString: String = gson.toJson(sheetData)
+
             browser.post {
                 run {
                     var url = "javascript:Drawmusicnotes('$jsonString')"
                     browser.loadUrl(url)
                 }
             }
-
-            musicNotesViewModel.openFileFinish(sheetData)
         }
     }
 
@@ -155,15 +161,24 @@ class ShowMusicNotesFragment : Fragment() {
         inflater?.inflate(R.menu.option_menu, menu)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
+    override fun onResume() {
+        super.onResume()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            R.id.openfile ->{
+        return when (item.itemId) {
+            R.id.openfile -> {
                 /**Select musicXMl File*/
                 openFile()
                 true
             }
-            R.id.setting ->{
-                true
+            R.id.settingFragment -> {
+                NavigationUI.onNavDestinationSelected(item!!, view!!.findNavController())
+                        || super.onOptionsItemSelected(item)
             }
             else -> super.onOptionsItemSelected(item)
         }

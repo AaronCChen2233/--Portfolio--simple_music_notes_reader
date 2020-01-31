@@ -55,7 +55,6 @@
             android:layout_marginEnd="50dp"
             android:layout_marginBottom="50dp"
             android:visibility="@{(Boolean.valueOf(musicNotesViewModel.isShowTitleImage()) ? View.GONE : View.VISIBLE )}"
-            android:enabled="@{Boolean.valueOf(musicNotesViewModel.isPlayBtnEnable)}"
             android:onClick="@{() -> musicNotesViewModel.onPlayOrStop()}"
             android:src="@{(Boolean.valueOf(musicNotesViewModel.isPlaying()) ? @drawable/ic_stop_foreground : @drawable/ic_play_foreground)}"
             app:layout_constraintBottom_toBottomOf="parent"

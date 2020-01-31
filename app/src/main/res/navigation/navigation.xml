@@ -10,4 +10,8 @@
         android:name="com.example.simplemusicnotesreader.activities.ShowMusicNotesFragment"
         android:label="fragment_show_music_notes"
         tools:layout="@layout/fragment_show_music_notes" />
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.example.simplemusicnotesreader.activities.SettingFragment"
+        android:label="SettingFragment" />
 </navigation>

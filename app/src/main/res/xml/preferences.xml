@@ -1,15 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <android.support.v7.preference.SwitchPreferenceCompat
+<!--<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:layout_width="match_parent" android:layout_height="match_parent">-->
+
+<!--        <android.support.v7.preference.SwitchPreference-->
+<!--            android:defaultValue="false"-->
+<!--            android:key="always_use_ctempo"-->
+<!--            android:title="Always use custom tempo" />-->
+
+<!--        <android.support.v7.preference.EditTextPreference-->
+<!--            android:defaultValue="60"-->
+<!--            android:key="custom_tempo"-->
+<!--            android:selectAllOnFocus="true"-->
+<!--            android:singleLine="true"-->
+<!--            android:title="Custom tempo" />-->
+
+<!--        <android.support.v7.preference.EditTextPreference-->
+<!--            android:inputType="number"-->
+<!--            android:defaultValue="0"-->
+<!--            android:key="interval"-->
+<!--            android:selectAllOnFocus="true"-->
+<!--            android:singleLine="true"-->
+<!--            android:summary="When user click play wait how many seconds"-->
+<!--            android:title="Interval" />-->
+
+<!--</android.support.v7.preference.PreferenceScreen>-->
+
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
         android:defaultValue="false"
         android:key="always_use_ctempo"
         android:title="Always use custom tempo" />
 
     <EditTextPreference
-        android:defaultValue="false"
-        android:key="edit_text_preference_1"
+        android:defaultValue="60"
+        android:key="custom_tempo"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="Edit text preference" />
+        android:title="Custom tempo" />
+
+    <EditTextPreference
+        android:defaultValue="0"
+        android:key="interval"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:summary="When user click play wait how many seconds"
+        android:title="Interval" />
+
 </PreferenceScreen>

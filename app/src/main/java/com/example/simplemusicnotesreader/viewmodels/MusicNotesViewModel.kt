@@ -1,5 +1,6 @@
 package com.example.simplemusicnotesreader.viewmodels
 
+import android.animation.ObjectAnimator
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,8 @@ import com.example.simplemusicnotesreader.models.musicSheet
 
 class MusicNotesViewModel : ViewModel() {
     var musicSheet: musicSheet? = null
+    var anim: ObjectAnimator? = null
+
     private val _isPlayBtnEnable = MutableLiveData<Boolean>()
 
     val isPlayBtnEnable: LiveData<Boolean>
@@ -51,6 +54,9 @@ class MusicNotesViewModel : ViewModel() {
         _isShowTitleImage.value = false
         _barCount.value = sheetData.barDatas.size
         musicSheet = sheetData
+
+        _isStop.value = true
+        _isPlaying.value = false
     }
 
     /**Play and Stop are same button click will change function*/

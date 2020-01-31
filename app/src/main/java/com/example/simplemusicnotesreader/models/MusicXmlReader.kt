@@ -68,7 +68,7 @@ fun getBarsDatas(docs: NodeList): ArrayList<barData> {
             if (tieString == "forward") {
                 repeatStartIndex = i
             } else if (tieString == "backward") {
-                repeatEndIndex = i
+                repeatEndIndex = i+1
                 bars.addAll(bars.subList(repeatStartIndex, repeatEndIndex))
             }
         }

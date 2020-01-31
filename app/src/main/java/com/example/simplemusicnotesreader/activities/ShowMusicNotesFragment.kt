@@ -60,14 +60,14 @@ class ShowMusicNotesFragment : Fragment() {
         settings.domStorageEnabled = true
         browser.loadUrl("file:///android_asset/musicnotes.html")
 
-        musicNotesViewModel.isPlaying.observe(this, Observer { isPlaying ->
+        musicNotesViewModel.isPlaying.observe(viewLifecycleOwner, Observer { isPlaying ->
             if (isPlaying) {
                 val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
                 val interval = sharedPreferences.getString("interval", "0")!!.toLong()
                 val alwaysuseCtempo = sharedPreferences.getBoolean("always_use_ctempo", false)
                 val cTempo = sharedPreferences.getString("custom_tempo", "60")!!.toInt()
 
-                if(alwaysuseCtempo){
+                if (alwaysuseCtempo) {
                     musicNotesViewModel.reSetbarTime(cTempo)
                 }
 
@@ -95,7 +95,7 @@ class ShowMusicNotesFragment : Fragment() {
                     musicNotesViewModel.anim?.doOnEnd {
                         musicNotesViewModel.onPlayEnd()
                     }
-                    musicNotesViewModel.anim?.setStartDelay(interval*1000)
+                    musicNotesViewModel.anim?.setStartDelay(interval * 1000)
                     musicNotesViewModel.anim?.setDuration(barCount * timePreBar)?.start()
                 }
             } else {
@@ -111,21 +111,7 @@ class ShowMusicNotesFragment : Fragment() {
 
         setHasOptionsMenu(true)
         binding.musicNotesViewModel = musicNotesViewModel
-
         return binding.root
-    }
-
-    private fun openFile() {
-        /**If is playing stop it*/
-        if (musicNotesViewModel.anim != null) {
-            /**Scroll stop*/
-            musicNotesViewModel.anim?.cancel()
-        }
-
-        val intent = Intent()
-            .setType("*/*")
-            .setAction(Intent.ACTION_GET_CONTENT)
-        startActivityForResult(Intent.createChooser(intent, "Select musicXml File"), 111)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -137,24 +123,14 @@ class ShowMusicNotesFragment : Fragment() {
             var doc = parseXml(inputStream!!)
             var sheetData = musicXmlReader(doc)
 
-            webViewLoadData(sheetData)
             musicNotesViewModel.openFileFinish(sheetData)
+//            webViewLoadData(sheetData)
         }
     }
 
-    private fun webViewLoadData(sheetData: musicSheet?) {
-        if (sheetData != null) {
-            /**Convert to json*/
-            var gson = Gson()
-            var jsonString: String = gson.toJson(sheetData)
-
-            browser.post {
-                run {
-                    var url = "javascript:Drawmusicnotes('$jsonString')"
-                    browser.loadUrl(url)
-                }
-            }
-        }
+    override fun onResume() {
+        super.onResume()
+        webViewLoadData(musicNotesViewModel.musicSheet)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -174,6 +150,34 @@ class ShowMusicNotesFragment : Fragment() {
                         || super.onOptionsItemSelected(item)
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun openFile() {
+        /**If is playing stop it*/
+        if (musicNotesViewModel.anim != null) {
+            /**Scroll stop*/
+            musicNotesViewModel.anim?.cancel()
+        }
+
+        val intent = Intent()
+            .setType("*/*")
+            .setAction(Intent.ACTION_GET_CONTENT)
+        startActivityForResult(Intent.createChooser(intent, "Select musicXml File"), 111)
+    }
+
+    private fun webViewLoadData(sheetData: musicSheet?) {
+        if (sheetData != null) {
+            /**Convert to json*/
+            var gson = Gson()
+            var jsonString: String = gson.toJson(sheetData)
+
+            browser.post {
+                run {
+                    var url = "javascript:Drawmusicnotes('$jsonString')"
+                    browser.loadUrl(url)
+                }
+            }
         }
     }
 

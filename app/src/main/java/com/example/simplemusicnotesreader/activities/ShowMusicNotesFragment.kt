@@ -34,10 +34,6 @@ class ShowMusicNotesFragment : Fragment() {
     private lateinit var musicNotesViewModel: MusicNotesViewModel
     private lateinit var viewModelFactory: MusicNotesViewModelFactory
     private lateinit var browser: WebView
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,9 +62,14 @@ class ShowMusicNotesFragment : Fragment() {
 
         musicNotesViewModel.isPlaying.observe(this, Observer { isPlaying ->
             if (isPlaying) {
-
                 val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity)
-                val interval = sharedPreferences.getString("interval", "")
+                val interval = sharedPreferences.getString("interval", "0")!!.toLong()
+                val alwaysuseCtempo = sharedPreferences.getBoolean("always_use_ctempo", false)
+                val cTempo = sharedPreferences.getString("custom_tempo", "60")!!.toInt()
+
+                if(alwaysuseCtempo){
+                    musicNotesViewModel.reSetbarTime(cTempo)
+                }
 
                 val timePreBar = musicNotesViewModel.barTime.value ?: 0L
                 val height = (browser.contentHeight * browser.scale) - browser.height
@@ -94,7 +95,7 @@ class ShowMusicNotesFragment : Fragment() {
                     musicNotesViewModel.anim?.doOnEnd {
                         musicNotesViewModel.onPlayEnd()
                     }
-                    musicNotesViewModel.anim?.setStartDelay(interval!!.toLong()*1000)
+                    musicNotesViewModel.anim?.setStartDelay(interval*1000)
                     musicNotesViewModel.anim?.setDuration(barCount * timePreBar)?.start()
                 }
             } else {
@@ -159,14 +160,6 @@ class ShowMusicNotesFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater?.inflate(R.menu.option_menu, menu)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

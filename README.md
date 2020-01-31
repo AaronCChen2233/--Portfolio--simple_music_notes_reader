@@ -44,3 +44,7 @@ Because tempo in musicxml file is nullable so some file may not have tempo data 
 
 For user set some preferences
 ![Alt text](Demo%20Image/Screenshot_20200130-230134.png?raw=true "CLI ")
+
+## Demo video
+
+https://www.youtube.com/watch?v=trgDkIwCAbI&feature=youtu.be
